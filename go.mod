@@ -1,4 +1,4 @@
-module github.com/timboldt/tinygo-experiments/feather-m0-clock
+module github.com/timboldt/tinygo-experiments
 
 go 1.14
 
