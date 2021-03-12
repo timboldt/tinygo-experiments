@@ -1,0 +1,6 @@
+{
+    "go.toolsEnvVars": {
+        "GOROOT": "/Users/timboldt/Library/Caches/tinygo/goroot-go1.16-9de8c0a4b5a6ac2d27c52bd0f9ca5954b15a7045e830e2f025495ea1e0f07a84-syscall",
+        "GOFLAGS": "-tags=feather_m0,atsamd21g18a,atsamd21g18,atsamd21,sam,cortexm,baremetal,linux,arm,tinygo,gc.conservative,scheduler.tasks"
+    }
+}
