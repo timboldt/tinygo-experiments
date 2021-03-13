@@ -1,3 +1,20 @@
+// Copyright 2021 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// This is an experiment designed for the Adafruit Feather M0, although it could
+// be easily adapted if certain machine-specific pins like the battery voltage
+// pin were changed.
 package main
 
 import (
@@ -27,7 +44,7 @@ func main() {
 	clock := ds3231.New(machine.I2C0)
 	clock.Configure()
 
-	lcd := hd44780i2c.New(machine.I2C0, 0x27) // some modules have address 0x3F
+	lcd := hd44780i2c.New(machine.I2C0, 0x27)
 
 	lcd.Configure(hd44780i2c.Config{
 		Width:       20, // required
@@ -66,20 +83,26 @@ func main() {
 		//
 		// === Update the display ===
 		//
-		statusInfo := fmt.Sprintf("%d.%02d C  %d.%02d V",
+		statusInfo := fmt.Sprintf("%d.%02dC  %d.%02dV",
 			temperatureMilliC/1000, temperatureMilliC%1000/10,
 			batteryMilliVolts/1000, batteryMilliVolts%1000/10)
-		println(clockTime.Format(time.Kitchen), statusInfo)
+		println(statusInfo)
 
-		powerInfo := fmt.Sprintf("%d.%02dmV %dmA %dmW", milliVolts/1000, milliVolts%1000/10, microAmps/1000, microWatts/1000)
+		powerInfo := fmt.Sprintf("%d.%02dmV %dmA %dmW",
+			milliVolts/1000, milliVolts%1000/10,
+			microAmps/1000,
+			microWatts/1000)
 		println(powerInfo)
+
+		clockInfo := clockTime.Format("Mon Jan _2 15:04:05")
+		println(clockInfo)
 
 		lcd.ClearDisplay()
 		lcd.Print([]byte(statusInfo))
 		lcd.Print([]byte("\n"))
 		lcd.Print([]byte(powerInfo))
 		lcd.Print([]byte("\n"))
-		lcd.Print([]byte(clockTime.Format(time.ANSIC)))
+		lcd.Print([]byte(clockInfo))
 
 		time.Sleep(1 * time.Second)
 	}
