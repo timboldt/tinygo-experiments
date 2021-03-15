@@ -53,7 +53,10 @@ func main() {
 
 	// Initialize Battery Voltage ADC.
 	vbat := machine.ADC{Pin: machine.D20}
-	vbat.Configure(machine.ADCConfig{})
+	vbat.Configure(machine.ADCConfig{
+		Reference:  3000,
+		Resolution: 12,
+	})
 
 	powerMeter := ina219.New(machine.I2C0)
 	powerMeter.Configure(nil)
@@ -71,8 +74,8 @@ func main() {
 			println("Error reading time", err)
 			clockTime = time.Time{}
 		}
-		// Voltage divider is half of 3.3V and total scale is 65536.
-		batteryMilliVolts := int32(vbat.Get()) * 2 * 3300 / 65536
+		// 2x divider, 3V scale, 12-bit resolution, up-shifted by 4 bits internally.
+		batteryMilliVolts := int32(vbat.Get()) * 2 * 3000 / 4096 / 16
 
 		milliVolts := powerMeter.GetVoltage_mV()
 		microAmps := powerMeter.GetCurrent_uA()
