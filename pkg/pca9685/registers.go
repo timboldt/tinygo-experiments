@@ -34,5 +34,7 @@ const (
 
 // Typical PWM prescalar values (assuming a 25MHz clock).
 const (
-	PRESCALE_SERVO = 121 // 50Hz
+	CLOCK_MHZ       = 25
+	PRESCALE_SERVO  = 121 // 50Hz
+	MICROS_PER_TICK = (PRESCALE_SERVO + 1 + CLOCK_MHZ/2) / CLOCK_MHZ
 )

@@ -69,19 +69,22 @@ func (d *Device) Configure() error {
 	return nil
 }
 
-// Set the PWM value for a given pin.
+// SetPin sets the pulse width for a given pin to an approximate number of microseconds.
 // Valid pin values are 0..15.
-// Valid values are 0..4095.
-// A value of 0 is completely OFF.
-// A value of 4095 is always ON.
-func (d *Device) SetPWM(pin byte, val uint16) error {
+// Valid values are 1000 to 2000, or zero.
+// A value of 0 turns off the servo.
+func (d *Device) SetPin(pin byte, micros uint16) error {
 	if pin > 15 {
-		return fmt.Errorf("invalid PWM pin: %d", pin)
+		return fmt.Errorf("invalid pin: %d", pin)
 	}
-	if val > 4095 {
-		val = 4095
+	if micros != 0 && (micros < 1000 || micros > 2000) {
+		return fmt.Errorf("invalid servo timing: %d us", micros)
 	}
-	// TODO: Handle special cases for always on and always off.
+	val := micros / MICROS_PER_TICK
+	if val == 0 {
+		// Special value for fully off is (0, 4096).
+		val = 4096
+	}
 	reg := REG_PWM0_ON_L + pin*4
 	data := []byte{0, 0, byte(val) & 0xFF, byte(val >> 8)}
 	return d.bus.WriteRegister(uint8(d.address), reg, data[:])

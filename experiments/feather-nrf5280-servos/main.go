@@ -41,7 +41,7 @@ func main() {
 
 	var pin byte
 	for {
-		if err := pwm.SetPWM(pin, 127); err != nil {
+		if err := pwm.SetPin(pin, 1250); err != nil {
 			status = fmt.Sprintf("set pin PWM failed: %v", err)
 		}
 		if pin == 0 {
@@ -49,7 +49,7 @@ func main() {
 		} else {
 			pin = 0
 		}
-		if err := pwm.SetPWM(pin, 2048); err != nil {
+		if err := pwm.SetPin(pin, 1500); err != nil {
 			status = fmt.Sprintf("set pin PWM failed: %v", err)
 		}
 
