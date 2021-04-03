@@ -77,7 +77,7 @@ func (d *Device) SetPin(pin byte, micros uint16) error {
 	if pin > 15 {
 		return fmt.Errorf("invalid pin: %d", pin)
 	}
-	if micros != 0 && (micros < 1000 || micros > 2000) {
+	if micros != 0 && (micros < 500 || micros > 3000) {
 		return fmt.Errorf("invalid servo timing: %d us", micros)
 	}
 	val := micros / MICROS_PER_TICK

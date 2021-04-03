@@ -18,14 +18,15 @@ package main
 import (
 	"fmt"
 	"machine"
-
+	"strconv"
 	"time"
 
 	"github.com/timboldt/tinygo-experiments/pkg/pca9685"
 )
 
 func main() {
-	status := "OK"
+	time.Sleep(10 * time.Second)
+	println("hi")
 
 	//
 	// === Initialize hardware ===
@@ -36,24 +37,52 @@ func main() {
 
 	pwm := pca9685.New(machine.I2C0)
 	if err := pwm.Configure(); err != nil {
-		status = fmt.Sprintf("configure failed: %v", err)
+		fmt.Printf("configure failed: %v", err)
 	}
 
-	var pin byte
+	var currPin byte
+	inbuf := make([]byte, 64)
+	inbufIdx := 0
+	uart := machine.UART0
 	for {
-		if err := pwm.SetPin(pin, 1250); err != nil {
-			status = fmt.Sprintf("set pin PWM failed: %v", err)
-		}
-		if pin == 0 {
-			pin = 1
-		} else {
-			pin = 0
-		}
-		if err := pwm.SetPin(pin, 1500); err != nil {
-			status = fmt.Sprintf("set pin PWM failed: %v", err)
-		}
+		if uart.Buffered() > 0 {
+			data, _ := uart.ReadByte()
+			// Echo what the user types.
+			uart.WriteByte(data)
 
-		fmt.Printf("Status:  %v\n", status)
-		time.Sleep(1 * time.Second)
+			switch data {
+			case '\n':
+				fallthrough
+			case '\r':
+				if inbufIdx > 0 {
+					if inbuf[0] == 'p' && inbufIdx > 1 {
+						val, err := strconv.Atoi(string(inbuf[1:inbufIdx]))
+						if err != nil {
+							fmt.Println(err)
+						} else {
+							currPin = byte(val)
+							fmt.Printf("Setting pin %d to %d\n", currPin, 1500)
+							if err := pwm.SetPin(currPin, uint16(1500)); err != nil {
+								fmt.Printf("set pin PWM failed: %v", err)
+							}
+						}
+					} else {
+						val, err := strconv.Atoi(string(inbuf[:inbufIdx]))
+						if err != nil {
+							fmt.Println(err)
+						} else {
+							fmt.Printf("Setting pin %d to %d\n", currPin, val)
+							if err := pwm.SetPin(currPin, uint16(val)); err != nil {
+								fmt.Printf("set pin PWM failed: %v", err)
+							}
+						}
+					}
+					inbufIdx = 0
+				}
+			default:
+				inbuf[inbufIdx] = data
+				inbufIdx++
+			}
+		}
 	}
 }
